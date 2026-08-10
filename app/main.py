@@ -8,7 +8,12 @@ class QuestionRequest(BaseModel):
 
 def generate_answer(question: str) -> str:
     # ここで質問に対する回答を生成するロジックを実装します
-    return f"これは仮の回答です。あなたの質問は 「{question}」 です。"
+    if "NVH" in question:
+        return "NVHはNoise, Vibration, Harshnessの略語です。"
+    if "ギヤ" in question or "ギア" in question:
+        return "ギアノイズには、歯形誤差、噛み合い誤差、剛性変動などが影響します。"
+    return f"申し訳ありません。その質問についてはまだ回答できません。あなたの質問は 「{question}」 です。"
+
 
 
 @app.get("/")
