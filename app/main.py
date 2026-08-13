@@ -16,6 +16,7 @@ create_table()
 client = OpenAI(
     api_key=os.getenv("OPENAI_API_KEY")
 )
+VECTOR_STORE_ID = os.getenv("VECTOR_STORE_ID")
 
 
 
@@ -42,6 +43,12 @@ def ask(question: str):
             - 回答は簡潔にまとめる
             """,
             input=question,
+            tools=[
+                {
+                    "type": "file_search",
+                    "vector_store_ids": [VECTOR_STORE_ID],
+                }
+            ],
             max_output_tokens=1000
         )
         
@@ -60,9 +67,10 @@ def ask(question: str):
         }
 
     except Exception as e:
+        print("ERROR:" , repr(e))
         raise HTTPException(
             status_code=500, 
-            detail="AIへの問い合わせ中にエラーが発生しました。"
+            detail=str(e)
             )
     
 
