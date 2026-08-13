@@ -1,4 +1,5 @@
 import sqlite3
+import datetime
 
 DATABASE_NAME = 'test.db'
 
@@ -27,10 +28,12 @@ def save_question(question, answer):
     connection = get_connection()
     cursor = connection.cursor()
 
+    created_at = datetime.datetime.now().astimezone().isoformat()
+
     cursor.execute('''
-        INSERT INTO questions (question, answer) 
-        VALUES (?, ?)
-    ''', (question, answer))
+        INSERT INTO questions (question, answer, created_at) 
+        VALUES (?, ?, ?)
+    ''', (question, answer, created_at))
 
 
     connection.commit()
