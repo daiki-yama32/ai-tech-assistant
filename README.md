@@ -4,22 +4,26 @@ Technical documentation AI assistant using OpenAI API, File Search, FastAPI, and
 
 ## Overview
 
-AI Technical Assistant is an AI-powered application that allows users to ask questions about technical documents.
+AI Technical Assistant is a web-based AI application that allows users to ask questions about technical documents.
 
-The application uses OpenAI File Search to retrieve relevant information from a technical document and generates an answer based on the retrieved content.
+The application uses OpenAI File Search to retrieve relevant information from technical documents and generates answers based on the retrieved content.
 
-User questions and AI-generated answers are also stored in a SQLite database and can be retrieved through the history API.
+The system also displays the source documents used for the answer and stores question and answer history in SQLite.
+
+The application provides a simple Web UI and can be run in a Docker container.
 
 ## Features
 
 * Ask questions about technical documents
+* Web-based user interface
 * Search documents using OpenAI File Search
 * Generate answers using OpenAI Responses API
+* Display source documents used for the answer
 * Store question and answer history in SQLite
-* Retrieve previous questions and answers
+* Display question and answer history
 * Validate empty questions
-* Handle API errors
-* Display token usage for each request
+* Handle API and application errors
+* Log token usage for each request
 * Run the application with Docker
 
 ## System Architecture
@@ -28,38 +32,46 @@ User questions and AI-generated answers are also stored in a SQLite database and
 User
   │
   ▼
+Web UI
+  │
+  ▼
 FastAPI
   │
-  ▼
-/ask
+  ├── /ask
+  │     │
+  │     ▼
+  │   OpenAI Responses API
+  │     │
+  │     ├── File Search
+  │     │      │
+  │     │      ▼
+  │     │   Vector Store
+  │     │      │
+  │     │      ▼
+  │     │   Technical Documents
+  │     │
+  │     ▼
+  │   AI-generated Answer
   │
-  ▼
-OpenAI Responses API
-  │
-  ├── File Search
-  │      │
-  │      ▼
-  │   Vector Store
-  │      │
-  │      ▼
-  │   Technical Document
-  │
-  ▼
-AI-generated Answer
-  │
-  ▼
-SQLite
-  │
-  ▼
-/history
-```
+  └── /history
+         │
+         ▼
+      SQLite
+
+Web UI displays:
+  ├── AI-generated Answer
+  ├── Source Documents
+  └── Question & Answer History
+
+```text
 
 ## Technologies
 
 | Technology         | Purpose                              |
 | ------------------ | ------------------------------------ |
 | Python             | Application development              |
-| FastAPI            | REST API                             |
+| FastAPI            | REST API and Web application backend |
+| HTML / CSS / JavaScript | Web UI                          |
 | OpenAI API         | AI response generation               |
 | OpenAI File Search | Technical document search            |
 | Vector Store       | Storage for searchable document data |
@@ -78,12 +90,12 @@ ai-tech-assistant/
 │   └── main.py
 │
 ├── documents/
-│   └── .gitkeep
+│   ├── .gitkeep
+│   └── technical_document.pdf
 │
 ├── tests/
 │   └── .gitkeep
 │
-├── technical_document.pdf
 ├── test.db
 ├── Dockerfile
 ├── requirements.txt
@@ -96,21 +108,53 @@ ai-tech-assistant/
 └── README.md
 ```
 
+
+## Web UI
+
+The application provides a simple Web UI for interacting with the AI Technical Assistant.
+
+Users can:
+
+* Enter questions about technical documents
+* View AI-generated answers
+* View source documents used for the answer
+* View previous question and answer history
+* Receive error messages for invalid input or application errors
+
+The Web UI communicates with the FastAPI backend.
+
+## RAG and Source Documents
+
+The application uses OpenAI File Search to search technical documents stored in a Vector Store.
+
+When a user asks a question, relevant information is retrieved from the technical documents and provided to the AI model.
+
+The application also retrieves the source document information and displays it in the Web UI.
+
+This allows users to verify which technical document was used as the basis for the AI-generated answer.
+
 ## API Endpoints
 
 ### POST `/ask`
 
 Send a question to the AI assistant.
 
-Example:
+Example response:
 
 ```json
 {
-  "question": "モーターの最大回転数は何rpmですか？"
+  "answer": "モーターの最大回転数は6000rpmです。",
+  "sources": [
+    {
+      "file_name": "technical_document.pdf"
+    }
+  ]
 }
 ```
 
-The API returns the question, AI-generated answer, model information, and token usage.
+The API returns the question, AI-generated answer, source documents, model information, and token usage.
+
+
 
 ### GET `/history`
 
@@ -225,7 +269,7 @@ docker run -p 8000:8000 --env-file .env ai-tech-assistant
 Then open:
 
 ```text
-http://127.0.0.1:8000/docs
+http://127.0.0.1:8000/
 ```
 
 ## Example
@@ -236,24 +280,42 @@ A user asks:
 モーターの最大回転数は何rpmですか？
 ```
 
-The AI searches the technical document using File Search and generates an answer based on the retrieved information.
+The AI searches the technical documents using File Search and generates an answer based on the retrieved information.
 
-The question and answer are then stored in SQLite.
+The Web UI displays both the AI-generated answer and the source document used for the answer.
+
+The question and answer are then stored in SQLite and displayed in the question history.
+
+## Screenshots
+
+### Web UI
+
+![Web UI](docs/web-ui.png)
+
+### RAG Source Display
+
+![RAG Source Display](docs/rag-source.png)
+
+### Question History
+
+![Question History](docs/history.png)
 
 ## Future Improvements
 
-The following features are planned for future versions:
+Possible future improvements include:
 
-* Web-based user interface
-* Display RAG citation sources
-* Web-based conversation history
-* Improved error handling
-* Better user experience
-* Additional technical documents
+* Persistent Docker volumes for SQLite data
+* Automatic synchronization of documents in the Vector Store
+* Prevention of duplicate document registration
+* Support for additional document formats
 * More comprehensive automated tests
+* Improved Web UI design
+* User authentication and access control
 
 ## Project Goal
 
-This project was developed as a practical exercise in building an AI application using Python and modern AI technologies.
+This project was developed as a practical exercise in building an AI-powered technical document assistant.
 
-The project covers the complete development flow from API development and database integration to RAG-based document search and Docker containerization.
+The project covers the development flow from API development and database integration to RAG-based document search, Web UI development, error handling, and Docker containerization.
+
+The goal is to build a practical AI application that can be used to search technical documents, provide answers with source information, and maintain question and answer history.
