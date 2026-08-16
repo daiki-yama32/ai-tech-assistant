@@ -1,6 +1,0 @@
-.venv/
-__pycahe__/
-*.pyc
-.git/
-.gitignore
-.env

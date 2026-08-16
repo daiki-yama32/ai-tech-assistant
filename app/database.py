@@ -1,7 +1,7 @@
 import sqlite3
 import datetime
 
-DATABASE_NAME = 'test.db'
+DATABASE_NAME = 'data/history.db'
 
 
 def get_connection():

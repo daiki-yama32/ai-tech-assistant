@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <title>AI Tech Assistant</title>
+</head>
+
+<body>
+
+    <h1>AI Tech Assistant</h1>
+
+    <form id="question-form">
+
+        <label for="question">質問:</label>
+
+        <br><br>
+
+        <input
+            type="text"
+            id="question"
+            name="question"
+            placeholder="質問を入力してください"
+            size="50"
+        >
+
+        <button type="submit">質問する</button>
+
+    </form>
+
+
+    <h2>回答:</h2>
+
+    <p id="answer">ここに回答が表示されます。</p>
+
+
+    <h2>参照した文書:</h2>
+
+    <ul id="sources"></ul>
+
+    <h2>質問履歴</h2>
+
+    <div id="history"></div>
+
+    <script>
+
+        const form = document.getElementById("question-form");
+
+        form.addEventListener("submit", async function(event) {
+            event.preventDefault();
+            const question =
+                document.getElementById("question").value;
+
+            try {
+
+                const response = await fetch(
+                    "/ask?question=" + encodeURIComponent(question),
+                    {
+                        method: "POST"
+                    }
+                );
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.detail);
+                }
+
+
+                // 回答を表示
+
+                document.getElementById("answer").textContent =
+                    data.answer;
+
+
+                // 参照文書を表示
+
+                const sourcesElement =
+                    document.getElementById("sources");
+
+                sourcesElement.innerHTML = "";
+
+
+                data.sources.forEach(function(source) {
+                    const li = document.createElement("li");
+                    li.textContent = source.file_name;
+                    sourcesElement.appendChild(li);
+                });
+
+                console.log(
+                    "Sources HTML:",
+                    sourcesElement.innerHTML
+                );
+
+            } catch (error) {
+
+                console.error("Error:", error);
+
+                document.getElementById("answer").textContent =
+                    "エラー: " + error.message;
+
+            }
+
+        });
+
+        async function loadHistory() {
+            try {
+                const response = await fetch("/history");
+                const history = await response.json();
+                if (!response.ok) {
+                    throw new Error(history.detail);
+                }
+                const historyElement = document.getElementById("history");
+                historyElement.innerHTML = "";
+                history.forEach(function(item) {
+                    const div = document.createElement("div");
+                    div.innerHTML = `
+                        <hr>
+                        <p><strong>質問:</strong> ${item.question}</p>
+                        <p><strong>回答:</strong> ${item.answer}</p>
+                        <p><strong>日時:</strong> ${item.created_at}</p>
+                    `;
+                    historyElement.appendChild(div);
+                });
+            } catch (error) {
+                console.error("履歴取得エラー:", error);
+            }
+        };
+        loadHistory()
+
+    </script>
+
+</body>
+
+</html>
