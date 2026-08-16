@@ -63,7 +63,7 @@ Web UI displays:
   ├── Source Documents
   └── Question & Answer History
 
-```text
+```
 
 ## Technologies
 
@@ -96,7 +96,9 @@ ai-tech-assistant/
 ├── tests/
 │   └── .gitkeep
 │
-├── test.db
+├── data/
+│   └── .gitkeep
+│
 ├── Dockerfile
 ├── requirements.txt
 ├── upload_file.py
@@ -163,6 +165,12 @@ Returns previously stored questions and answers from the SQLite database.
 ## Database
 
 The application uses SQLite to store question and answer history.
+
+The history is stored in:
+
+```text
+data/history.db
+```
 
 The `questions` table contains:
 
@@ -263,8 +271,13 @@ docker build -t ai-tech-assistant .
 Run the container:
 
 ```bash
-docker run -p 8000:8000 --env-file .env ai-tech-assistant
+BMSYS_NO_PATHCONV=1 docker run -p 8000:8000 --env-file .env -v "$(pwd -W)/data:/app/data" -v "$(pwd -W)/documents:/app/documents" ai-tech-assistant
 ```
+
+The Docker container uses volume mounts to persist SQLite history data and access technical documents from the host machine.
+
+- `data/` → `/app/data`
+- `documents/` → `/app/documents`
 
 Then open:
 
@@ -304,7 +317,6 @@ The question and answer are then stored in SQLite and displayed in the question 
 
 Possible future improvements include:
 
-* Persistent Docker volumes for SQLite data
 * Automatic synchronization of documents in the Vector Store
 * Prevention of duplicate document registration
 * Support for additional document formats
